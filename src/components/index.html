@@ -1,0 +1,586 @@
+<!doctype html>
+<!--
+  >>> Instrucciones de imágenes <<<
+  Coloca una carpeta llamada "img" al mismo nivel que este HTML con los siguientes archivos:
+
+    img1.png  — Usuario: Home / Mapa
+    img2.png  — Usuario: Car Selector Sheet
+    img3.png  — Usuario: Ride Status Overlay
+    img4.png  — Usuario: Payment Sheet
+    img5.png  — Usuario: Receipt Panel
+    img6.png  — Usuario: History Panel
+
+    img7.png  — Corporación: Catálogo
+    img8.png  — Corporación: Detalle de Vehículo
+    img9.png  — Corporación: Pedidos (Listado)
+    img10.png — Corporación: Empresa (Perfil)
+    img11.png — Corporación: Onboarding (pasos)
+    img12.png — Corporación: Firma digital
+
+    img13.png — Admin (MÓVIL): Overview
+    img14.png — Admin (MÓVIL): Flota
+    img15.png — Admin (MÓVIL): Rentals
+    img16.png — Admin (MÓVIL): Finance
+    img17.png — Admin (MÓVIL): Automation
+
+    img18.png — Extra (opcional): CityCanvas 3D
+    img19.png — Extra (opcional): Splash / Intro
+-->
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover"/>
+  <title>Documentación del producto — SwiftRide (codename: PETROMIN)</title>
+  <meta name="description" content="Resumen ejecutivo, arquitectura y funcionalidad de una aplicación web mobile-first con panel de usuario, corporación y administrador. Usa imágenes locales /img/img1.png, img2.png…"/>
+  <style>
+    :root{
+      --bg:#FFFFFF; --ink:#0E0E10; --muted:#6B7280; --line:#E5E7EB; --soft:#F5F6F8;
+      --brand:#111111; --accent:#224CFF; --radius:18px; --shadow:0 10px 30px rgba(15,23,42,.08);
+      --maxw:1120px; --tocw:280px; --ring:#94a3b8;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0; background:var(--bg); color:var(--ink);
+      font:15px/1.55 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Inter,Roboto,Arial,system-ui,sans-serif;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
+    a{color:var(--accent); text-decoration:none} a:hover{text-decoration:underline}
+    .container{max-width:var(--maxw); margin:0 auto; padding:0 24px}
+    header.hero{position:relative; padding:56px 0 28px; border-bottom:1px solid var(--line);
+      background:linear-gradient(180deg,#FCFCFD 0%,#FFFFFF 60%);}
+    .hero__eyebrow{letter-spacing:.18em; text-transform:uppercase; color:#9AA2B5; font-weight:700; font-size:12px}
+    .hero__title{margin:10px 0 8px; font-weight:800; font-size:clamp(28px,5.2vw,44px); letter-spacing:-.02em}
+    .hero__subtitle{color:#374151; max-width:840px}
+    .chips{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 0}
+    .chip{border:1px solid var(--line); border-radius:999px; padding:6px 10px; font-weight:600; background:#FCFCFD}
+    .actions{display:flex; gap:10px; flex-wrap:wrap; margin:18px 0 0}
+    .btn{appearance:none; border:1px solid var(--line); background:#111; color:#fff; border-radius:12px;
+      padding:10px 14px; font-weight:700; letter-spacing:.01em; box-shadow:var(--shadow); cursor:pointer}
+    .btn.secondary{background:#fff; color:#111}
+    .layout{display:grid; grid-template-columns:minmax(0,1fr); gap:32px; padding:28px 0 64px}
+    @media (min-width:1100px){ .layout{grid-template-columns:var(--tocw) minmax(0,1fr); align-items:start} }
+    nav.toc{position:sticky; top:20px; align-self:start; border:1px solid var(--line); border-radius:16px; padding:14px; background:#fff}
+    .toc h3{margin:4px 10px 8px; font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:#9AA2B5}
+    .toc a{display:block; padding:8px 10px; border-radius:10px; color:#1f2937} .toc a:hover{background:var(--soft)}
+    section.block{scroll-margin-top:90px; border:1px solid var(--line); border-radius:22px; padding:26px; background:#fff; box-shadow:var(--shadow)}
+    section.block h2{margin:0 0 12px; font-size:22px; letter-spacing:-.01em}
+    .lead{font-size:16px; color:#374151}
+    .grid{display:grid; gap:16px} .grid.cols-2{grid-template-columns:1fr} .grid.cols-3{grid-template-columns:1fr}
+    @media (min-width:860px){ .grid.cols-2{grid-template-columns:1fr 1fr} .grid.cols-3{grid-template-columns:repeat(3,1fr)} }
+    .card{border:1px solid var(--line); border-radius:16px; padding:16px; background:linear-gradient(180deg,#FFFFFF 0%,#FAFBFC 100%)}
+    .muted{color:var(--muted)} .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace; background:#F3F4F6; border:1px solid #E5E7EB; padding:2px 6px; border-radius:6px}
+    .table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:12px; border:1px solid var(--line)}
+    .table th{background:#F8FAFC; text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#6B7280; padding:10px}
+    .table td{border-top:1px solid var(--line); padding:10px; vertical-align:top}
+    .pill{display:inline-flex; align-items:center; gap:6px; background:#F3F4F6; padding:4px 8px; border-radius:999px; font-weight:600; color:#111}
+    .small{font-size:13px}
+
+    /* === Dispositivos (MÓVIL) + placeholders elegantes === */
+    .screen-grid{display:grid; gap:18px; margin-top:14px; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr))}
+    figure.shot{margin:0; display:flex; flex-direction:column; gap:10px}
+    figure.shot figcaption{font-size:12px; color:#4b5563; display:flex; justify-content:space-between; align-items:center}
+    .badge{border:1px solid var(--line); border-radius:999px; padding:4px 8px; font-size:11px; color:#374151; background:#F8FAFC}
+    .device{position:relative; margin:auto; width:100%; max-width:420px; border-radius:36px; padding:12px; background:linear-gradient(180deg,#0a0a0a,#111); border:1px solid #0f1115; box-shadow:0 20px 50px rgba(0,0,0,.25)}
+    .device .notch{position:absolute; left:50%; top:8px; transform:translateX(-50%); width:56%; height:18px; background:#0a0a0a; border-radius:0 0 14px 14px; box-shadow:inset 0 -1px 0 rgba(255,255,255,.06)}
+    .device .screen{border-radius:26px; overflow:hidden; background:#F8FAFC; aspect-ratio:1170/2532; position:relative; display:grid; place-items:center}
+    .shot-img{display:none; width:100%; height:100%; object-fit:cover}
+    .fallback{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px;
+      border:2px dashed #D1D5DB; border-radius:24px; margin:6px; color:#6B7280; background:linear-gradient(180deg,#FFFFFF 0%, #FAFBFC 100%)}
+    .fallback svg{width:30px; height:30px; opacity:.55}
+    .fb-title{font-weight:800; color:#111}
+    .fb-hint{font-size:12px}
+
+    /* Code blocks + copy */
+    pre{margin:0; background:#0B0C0E; color:#EDEFF3; padding:14px; border-radius:12px; overflow:auto}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+    .copy{position:absolute; right:8px; top:8px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); color:#fff; border-radius:8px; font-size:12px; padding:6px 8px; cursor:pointer}
+    .codebox{position:relative; margin:10px 0 0}
+
+    footer{padding:40px 0 80px; color:#6B7280}
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <div class="hero__eyebrow">SwiftRide — codename: PETROMIN</div>
+      <h1 class="hero__title">Documentación ejecutiva & técnica de la aplicación (web mobile‑first)</h1>
+      <p class="hero__subtitle">
+        Guía para inversores y equipos con conocimientos medios de informática. Explica cómo está construida la aplicación,
+        sus paneles (Usuario, Corporación y Administrador móvil), la arquitectura y su potencial. Minimalista, precisa y aspiracional.
+      </p>
+      <div class="chips" aria-label="Tecnologías">
+        <span class="chip">React + TypeScript</span><span class="chip">Vite</span><span class="chip">Zustand (estado)</span>
+        <span class="chip">Framer Motion (UI)</span><span class="chip">Mapbox GL (mapa)</span><span class="chip">@react-three/fiber (3D)</span>
+        <span class="chip">Mobile‑first</span>
+      </div>
+      <div class="actions">
+        <button class="btn" onclick="window.print()">Imprimir / PDF</button>
+        <button class="btn secondary" id="export-html">Exportar HTML</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container layout">
+    <nav class="toc" aria-label="Índice de contenidos">
+      <h3>Contenido</h3>
+      <a href="#resumen">1. Resumen ejecutivo</a>
+      <a href="#funcionalidad">2. Qué hace la app</a>
+      <a href="#panel-usuario">3. Panel de Usuario</a>
+      <a href="#panel-corporacion">4. Panel de Corporación</a>
+      <a href="#panel-admin">5. Panel de Administrador (móvil)</a>
+      <a href="#arquitectura">6. Arquitectura & stack</a>
+      <a href="#seguridad">7. Seguridad y datos</a>
+      <a href="#despliegue">8. Configuración & despliegue</a>
+      <a href="#roadmap">9. Roadmap recomendado</a>
+      <a href="#faq">10. FAQ</a>
+      <a href="#anexos">Anexos + Mapa del código</a>
+    </nav>
+
+    <main class="content">
+      <!-- 1. RESUMEN -->
+      <section id="resumen" class="block">
+        <h2>1) Resumen ejecutivo</h2>
+        <p class="lead">
+          SwiftRide (nombre interno: <strong>PETROMIN</strong>) es una aplicación web <em>mobile‑first</em> para
+          <strong>solicitar, gestionar y operar</strong> una flota (SUV 4x4, vans, pickups y maquinaria pesada) con una experiencia
+          estilo Uber/Apple: limpia, intuitiva y orientada a negocio.
+        </p>
+        <div class="grid cols-3">
+          <div class="card"><strong>3 vistas principales</strong><p class="muted small">Usuario, Corporación y Administrador (móvil).</p></div>
+          <div class="card"><strong>Mapa y 3D</strong><p class="muted small">Mapbox GL y <span class="kbd">@react-three/fiber</span>.</p></div>
+          <div class="card"><strong>Arquitectura ligera</strong><p class="muted small">React + Vite + Zustand + Framer Motion.</p></div>
+        </div>
+      </section>
+
+      <!-- 2. QUE HACE -->
+      <section id="funcionalidad" class="block">
+        <h2>2) Qué hace la aplicación</h2>
+        <p class="lead">
+          Visualiza vehículos (demo en Buenos Aires, <span class="kbd">-34.6037, -58.3816</span>), permite elegir destino,
+          confirmar servicio, firmar digitalmente (B2B) y gestionar pedidos, flota y métricas desde paneles dedicados.
+        </p>
+        <ul>
+          <li><strong>Reserva rápida:</strong> selección de vehículo y destino desde mapa o catálogo.</li>
+          <li><strong>Onboarding B2B:</strong> alta de empresa con documentos y <em>firma</em> en <span class="kbd">canvas</span>.</li>
+          <li><strong>Back‑office:</strong> overview ejecutivo, flota por tipos/unidades, pipeline y métricas.</li>
+        </ul>
+      </section>
+
+      <!-- 3. USUARIO -->
+      <section id="panel-usuario" class="block">
+        <h2>3) Panel de Usuario (ride‑hailing)</h2>
+        <p class="muted small">Código: <span class="kbd">src/screens/HomeScreen.tsx</span>, <span class="kbd">BAStreetMap.tsx</span>, <span class="kbd">CarSelectorSheet.tsx</span>, <span class="kbd">RideStatusOverlay.tsx</span>, <span class="kbd">PaymentSheet.tsx</span>, <span class="kbd">ReceiptPanel.tsx</span>, <span class="kbd">HistoryPanel.tsx</span></p>
+
+        <div class="grid cols-2">
+          <div class="card">
+            <strong>Flujo</strong>
+            <ol class="small">
+              <li>El usuario <strong>toca el mapa</strong> (Mapbox) o usa “Car Selector”.</li>
+              <li>Ve <strong>presupuesto</strong> y ruta estimada.</li>
+              <li>Desliza para <strong>pre‑confirmar</strong> y simula <strong>pago/propina</strong>.</li>
+              <li>Recibe <strong>recibo</strong> y accede al <strong>historial</strong>.</li>
+            </ol>
+          </div>
+          <div class="card">
+            <strong>UX</strong>
+            <ul class="small">
+              <li>Transiciones con <span class="kbd">Framer Motion</span>.</li>
+              <li>Bottom sheets y overlays táctiles.</li>
+              <li>Soporte 3D opcional (<span class="kbd">CityCanvas.tsx</span>).</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Screens USUARIO -->
+        <div class="screen-grid" aria-label="Screenshots — Panel de Usuario">
+          <figure class="shot"><figcaption>Home / Mapa <span class="badge">1170×2532 px</span></figcaption>
+            <div class="device"><div class="notch"></div><div class="screen">
+              <img class="shot-img" data-index="1" alt="Usuario: Home / Mapa"/>
+              <div class="fallback" data-fb-index="1">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg>
+                <div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div>
+              </div>
+            </div></div>
+          </figure>
+
+          <figure class="shot"><figcaption>Car Selector Sheet <span class="badge">1170×2532 px</span></figcaption>
+            <div class="device"><div class="notch"></div><div class="screen">
+              <img class="shot-img" data-index="2" alt="Usuario: Car Selector"/>
+              <div class="fallback" data-fb-index="2"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg><div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div></div>
+            </div></div>
+          </figure>
+
+          <figure class="shot"><figcaption>Ride Status Overlay <span class="badge">1170×2532 px</span></figcaption>
+            <div class="device"><div class="notch"></div><div class="screen">
+              <img class="shot-img" data-index="3" alt="Usuario: Ride Status"/>
+              <div class="fallback" data-fb-index="3"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg><div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div></div>
+            </div></div>
+          </figure>
+
+          <figure class="shot"><figcaption>Payment Sheet <span class="badge">1170×2532 px</span></figcaption>
+            <div class="device"><div class="notch"></div><div class="screen">
+              <img class="shot-img" data-index="4" alt="Usuario: Payment"/>
+              <div class="fallback" data-fb-index="4"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg><div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div></div>
+            </div></div>
+          </figure>
+
+          <figure class="shot"><figcaption>Receipt Panel <span class="badge">1170×2532 px</span></figcaption>
+            <div class="device"><div class="notch"></div><div class="screen">
+              <img class="shot-img" data-index="5" alt="Usuario: Receipt"/>
+              <div class="fallback" data-fb-index="5"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg><div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div></div>
+            </div></div>
+          </figure>
+
+          <figure class="shot"><figcaption>History Panel <span class="badge">1170×2532 px</span></figcaption>
+            <div class="device"><div class="notch"></div><div class="screen">
+              <img class="shot-img" data-index="6" alt="Usuario: History"/>
+              <div class="fallback" data-fb-index="6"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg><div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div></div>
+            </div></div>
+          </figure>
+        </div>
+        <p class="small muted">Requiere <span class="kbd">VITE_MAPBOX_TOKEN</span> para el mapa. Estado global en <span class="kbd">src/state/useAppStore.ts</span>.</p>
+      </section>
+
+      <!-- 4. CORPORACION -->
+      <section id="panel-corporacion" class="block">
+        <h2>4) Panel de Corporación</h2>
+        <p class="muted small">Código: <span class="kbd">CorporateExperience.tsx</span>, <span class="kbd">CatalogScreen.tsx</span>, <span class="kbd">VehicleDetailScreen.tsx</span>, <span class="kbd">OrderSignatureScreen.tsx</span>, <span class="kbd">CompanyScreen.tsx</span>, <span class="kbd">CompanyOnboardingScreen.tsx</span>, <span class="kbd">OrdersScreen.tsx</span></p>
+
+        <div class="grid cols-2">
+          <div class="card">
+            <strong>Secciones</strong>
+            <ul class="small">
+              <li><span class="pill">Catálogo</span> Filtros por destino/fechas/categoría/pasajeros.</li>
+              <li><span class="pill">Pedidos</span> Estados: review, approved, delivered…</li>
+              <li><span class="pill">Empresa</span> Perfil, facturación, documentos.</li>
+              <li><span class="pill">Onboarding</span> Alta guiada con firma.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <strong>Flujo B2B</strong>
+            <ol class="small">
+              <li>Seleccionar vehículo → ver pricing y políticas.</li>
+              <li>Elegir términos <span class="kbd">NET30/NET60</span>.</li>
+              <li>Firmar en <span class="kbd">canvas</span> y enviar.</li>
+              <li>Se genera purchase order (demo).</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Screens CORPORACIÓN -->
+        <div class="screen-grid" aria-label="Screenshots — Panel de Corporación">
+          <figure class="shot"><figcaption>Catálogo <span class="badge">1170×2532 px</span></figcaption>
+            <div class="device"><div class="notch"></div><div class="screen">
+              <img class="shot-img" data-index="7" alt="Corporación: Catálogo"/><div class="fallback" data-fb-index="7"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg><div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div></div>
+            </div></div>
+          </figure>
+
+          <figure class="shot"><figcaption>Detalle de Vehículo <span class="badge">1170×2532 px</span></figcaption>
+            <div class="device"><div class="notch"></div><div class="screen">
+              <img class="shot-img" data-index="8" alt="Corporación: Detalle de Vehículo"/><div class="fallback" data-fb-index="8"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg><div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div></div>
+            </div></div>
+          </figure>
+
+          <figure class="shot"><figcaption>Pedidos (Listado) <span class="badge">1170×2532 px</span></figcaption>
+            <div class="device"><div class="notch"></div><div class="screen">
+              <img class="shot-img" data-index="9" alt="Corporación: Pedidos"/><div class="fallback" data-fb-index="9"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg><div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div></div>
+            </div></div>
+          </figure>
+
+          <figure class="shot"><figcaption>Empresa (Perfil) <span class="badge">1170×2532 px</span></figcaption>
+            <div class="device"><div class="notch"></div><div class="screen">
+              <img class="shot-img" data-index="10" alt="Corporación: Empresa"/><div class="fallback" data-fb-index="10"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg><div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div></div>
+            </div></div>
+          </figure>
+
+          <figure class="shot"><figcaption>Onboarding (pasos) <span class="badge">1170×2532 px</span></figcaption>
+            <div class="device"><div class="notch"></div><div class="screen">
+              <img class="shot-img" data-index="11" alt="Corporación: Onboarding"/><div class="fallback" data-fb-index="11"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg><div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div></div>
+            </div></div>
+          </figure>
+
+          <figure class="shot"><figcaption>Firma digital <span class="badge">1170×2532 px</span></figcaption>
+            <div class="device"><div class="notch"></div><div class="screen">
+              <img class="shot-img" data-index="12" alt="Corporación: Firma digital"/><div class="fallback" data-fb-index="12"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg><div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div></div>
+            </div></div>
+          </figure>
+        </div>
+
+        <p class="small muted">Datos de ejemplo en <span class="kbd">src/data/mockData.ts</span> (vehículos, destinos, conductores, órdenes).</p>
+      </section>
+
+      <!-- 5. ADMIN (MÓVIL) -->
+      <section id="panel-admin" class="block">
+        <h2>5) Panel de Administrador (formato móvil)</h2>
+        <p class="muted small">Código: <span class="kbd">src/screens/AdminDashboard.tsx</span> + <span class="kbd">AdminDashboard.css</span>. Secciones: <em>overview</em>, <em>fleet</em>, <em>rentals</em>, <em>finance</em>, <em>automation</em>.</p>
+
+        <div class="grid cols-3">
+          <div class="card"><strong>Overview</strong><p class="small muted">KPIs ejecutivos y salud operativa.</p></div>
+          <div class="card"><strong>Flota</strong><p class="small muted">Tipos/unidades geolocalizadas (<span class="kbd">vehicleSeeds.ts</span>).</p></div>
+          <div class="card"><strong>Rentals & Finance</strong><p class="small muted">Pipeline + métricas de ingresos (demo).</p></div>
+        </div>
+
+        <!-- Screens ADMIN (MÓVIL) -->
+        <div class="screen-grid" aria-label="Screenshots — Panel de Administrador (móvil)">
+          <figure class="shot"><figcaption>Overview (Admin) <span class="badge">1170×2532 px</span></figcaption>
+            <div class="device"><div class="notch"></div><div class="screen">
+              <img class="shot-img" data-index="13" alt="Admin móvil: Overview"/><div class="fallback" data-fb-index="13"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg><div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div></div>
+            </div></div>
+          </figure>
+
+          <figure class="shot"><figcaption>Flota (Admin) <span class="badge">1170×2532 px</span></figcaption>
+            <div class="device"><div class="notch"></div><div class="screen">
+              <img class="shot-img" data-index="14" alt="Admin móvil: Flota"/><div class="fallback" data-fb-index="14"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg><div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div></div>
+            </div></div>
+          </figure>
+
+          <figure class="shot"><figcaption>Rentals (Admin) <span class="badge">1170×2532 px</span></figcaption>
+            <div class="device"><div class="notch"></div><div class="screen">
+              <img class="shot-img" data-index="15" alt="Admin móvil: Rentals"/><div class="fallback" data-fb-index="15"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg><div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div></div>
+            </div></div>
+          </figure>
+
+          <figure class="shot"><figcaption>Finance (Admin) <span class="badge">1170×2532 px</span></figcaption>
+            <div class="device"><div class="notch"></div><div class="screen">
+              <img class="shot-img" data-index="16" alt="Admin móvil: Finance"/><div class="fallback" data-fb-index="16"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg><div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div></div>
+            </div></div>
+          </figure>
+
+          <figure class="shot"><figcaption>Automation (Admin) <span class="badge">1170×2532 px</span></figcaption>
+            <div class="device"><div class="notch"></div><div class="screen">
+              <img class="shot-img" data-index="17" alt="Admin móvil: Automation"/><div class="fallback" data-fb-index="17"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg><div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div></div>
+            </div></div>
+          </figure>
+        </div>
+
+        <p class="small muted">El modo (usuario/corporación/admin) se decide por <span class="kbd">corporateMode</span> en <span class="kbd">App.tsx</span> + <span class="kbd">useAppStore.ts</span>.</p>
+      </section>
+
+      <!-- 6. ARQUITECTURA -->
+      <section id="arquitectura" class="block">
+        <h2>6) Arquitectura & Stack</h2>
+        <p class="lead">SPA moderna, rápida y mantenible. Datos simulados en cliente; la app está preparada para api‑ficarse.</p>
+        <div class="grid cols-2">
+          <div class="card">
+            <strong>Diagrama de alto nivel</strong>
+            <svg class="svg-arch" viewBox="0 0 900 360" role="img" aria-label="Arquitectura">
+              <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#F6F7FB"/></linearGradient></defs>
+              <rect x="24" y="24" width="360" height="312" rx="18" fill="url(#g)" stroke="#E5E7EB"/>
+              <text x="44" y="54" font-size="14" font-weight="700">Navegador (Mobile/Web)</text>
+              <rect x="44" y="74" width="320" height="70" rx="12" fill="#FFF" stroke="#E5E7EB"/>
+              <text x="60" y="102" font-size="13">React + Vite + TypeScript</text>
+              <text x="60" y="120" font-size="12" fill="#6B7280">Zustand • Framer Motion</text>
+              <rect x="44" y="154" width="320" height="70" rx="12" fill="#FFF" stroke="#E5E7EB"/>
+              <text x="60" y="182" font-size="13">Mapbox GL (mapa)</text>
+              <text x="60" y="200" font-size="12" fill="#6B7280">@react-three/fiber + three.js (3D)</text>
+              <rect x="44" y="234" width="320" height="82" rx="12" fill="#FFF" stroke="#E5E7EB"/>
+              <text x="60" y="262" font-size="13">Capas de la app</text>
+              <text x="60" y="280" font-size="12" fill="#6B7280">Usuario • Corporación • Admin</text>
+              <rect x="500" y="24" width="376" height="312" rx="18" fill="url(#g)" stroke="#E5E7EB"/>
+              <text x="520" y="54" font-size="14" font-weight="700">Servicios / Backend</text>
+              <rect x="520" y="74" width="336" height="60" rx="12" fill="#FFF" stroke="#E5E7EB"/><text x="536" y="102" font-size="13">Mapbox APIs</text>
+              <rect x="520" y="144" width="336" height="60" rx="12" fill="#FFF" stroke="#E5E7EB"/><text x="536" y="172" font-size="13">Backend corporativo (REST/GraphQL)</text>
+              <rect x="520" y="214" width="336" height="60" rx="12" fill="#FFF" stroke="#E5E7EB"/><text x="536" y="242" font-size="13">Pagos / Firma / SSO (a integrar)</text>
+              <defs><marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#CBD5E1"/></marker></defs>
+              <path d="M405 110 H500" stroke="#CBD5E1" stroke-width="2" marker-end="url(#arrow)"/>
+              <path d="M405 190 H500" stroke="#CBD5E1" stroke-width="2" marker-end="url(#arrow)"/>
+              <path d="M405 270 H500" stroke="#CBD5E1" stroke-width="2" marker-end="url(#arrow)"/>
+            </svg>
+          </div>
+          <div class="card">
+            <strong>Stack en una mirada</strong>
+            <ul class="small">
+              <li><b>React + Vite</b>: rendimiento alto y builds ultrarrápidos.</li>
+              <li><b>TypeScript</b>: tipos fuertes para menor deuda técnica.</li>
+              <li><b>Zustand</b>: estado global minimalista (<span class="kbd">useAppStore.ts</span>).</li>
+              <li><b>Framer Motion</b>: transiciones nítidas, nivel “app nativa”.</li>
+              <li><b>Mapbox GL</b>: mapa táctil (<span class="kbd">BAStreetMap.tsx</span>).</li>
+              <li><b>@react-three/fiber</b>: escena 3D opcional (<span class="kbd">CityCanvas.tsx</span>).</li>
+            </ul>
+            <div class="codebox">
+              <button class="copy" data-copy="#env">Copiar</button>
+              <pre id="env"><code># Variables de entorno (demo)
+VITE_MAPBOX_TOKEN=&lt;tu_token_mapbox&gt;</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. SEGURIDAD -->
+      <section id="seguridad" class="block">
+        <h2>7) Seguridad, privacidad y datos</h2>
+        <ul class="small">
+          <li><b>Datos de demo en cliente</b>: vehículos, destinos, conductores y pedidos en <span class="kbd">src/data/*.ts</span>.</li>
+          <li><b>Firma digital</b>: captura en <span class="kbd">&lt;canvas&gt;</span> (base64). En producción: hash + almacenamiento seguro.</li>
+          <li><b>Tokens</b>: solo Mapbox (demo). No hay credenciales reales.</li>
+          <li><b>Buenas prácticas</b>: OIDC/SSO, RBAC, TLS y auditoría de eventos.</li>
+        </ul>
+      </section>
+
+      <!-- 8. DESPLIEGUE -->
+      <section id="despliegue" class="block">
+        <h2>8) Configuración & despliegue</h2>
+        <div class="grid cols-2">
+          <div class="card">
+            <strong>Cómo ejecutar</strong>
+            <div class="codebox">
+              <button class="copy" data-copy="#run">Copiar</button>
+              <pre id="run"><code># 1) Instalar dependencias
+npm install
+
+# 2) Ejecutar en desarrollo
+npm run dev
+
+# 3) Compilar producción
+npm run build
+
+# 4) Previsualizar build
+npm run preview</code></pre>
+            </div>
+            <p class="small muted">Scripts definidos en <span class="kbd">package.json</span>.</p>
+          </div>
+          <div class="card">
+            <strong>Integraciones</strong>
+            <ul class="small">
+              <li>Mapa: <span class="kbd">VITE_MAPBOX_TOKEN</span> (Mapbox).</li>
+              <li>Backend (a integrar): REST/GraphQL para órdenes, flota, usuarios, documentos.</li>
+              <li>Pagos/Firma/SSO: Stripe/Adyen, DocuSign, Azure AD/Okta.</li>
+              <li>CDN estático: Cloudflare/Netlify/Vercel/Nginx.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. ROADMAP -->
+      <section id="roadmap" class="block">
+        <h2>9) Roadmap recomendado</h2>
+        <ol class="small">
+          <li><b>Autenticación & roles</b> (Usuario / Empresa / Admin) con SSO opcional.</li>
+          <li><b>API real</b> para pedidos y flota (persistencia + auditoría).</li>
+          <li><b>Pagos</b> y <b>contratos</b> con firma legal (PDF sellado/Hash).</li>
+          <li><b>Telemetría</b> (events typed ya existen) y dashboards.</li>
+          <li><b>Multi‑idioma</b> y <b>temas</b> (tokens en <span class="kbd">src/theme/tokens.ts</span>).</li>
+        </ol>
+      </section>
+
+      <!-- 10. FAQ -->
+      <section id="faq" class="block">
+        <h2>10) Preguntas frecuentes</h2>
+        <table class="table">
+          <thead><tr><th>Pregunta</th><th>Respuesta</th></tr></thead>
+          <tbody>
+            <tr><td>¿Funciona en móvil?</td><td>Sí. Está diseñada <em>mobile‑first</em> y funciona también en desktop.</td></tr>
+            <tr><td>¿Necesita backend para la demo?</td><td>No. Usa datos locales. En producción se conectan endpoints y auth.</td></tr>
+            <tr><td>¿Qué mapa usa?</td><td>Mapbox GL. Requiere <span class="kbd">VITE_MAPBOX_TOKEN</span>.</td></tr>
+            <tr><td>¿Dónde está la lógica de estado?</td><td>En <span class="kbd">src/state/useAppStore.ts</span> (Zustand).</td></tr>
+            <tr><td>¿Se puede cambiar la estética?</td><td>Sí. Base blanco/gris; tokens en <span class="kbd">src/theme/tokens.ts</span>.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ANEXOS -->
+      <section id="anexos" class="block">
+        <h2>Anexos — Mapa rápido del código</h2>
+        <div class="grid cols-2">
+          <div class="card">
+            <strong>Archivos clave</strong>
+            <table class="table small">
+              <thead><tr><th>Ruta</th><th>Rol</th></tr></thead>
+              <tbody>
+                <tr><td><span class="kbd">src/App.tsx</span></td><td>Router de modos (usuario / corporación / admin).</td></tr>
+                <tr><td><span class="kbd">src/state/useAppStore.ts</span></td><td>Estado global, flujos de ride y B2B, filtros, events.</td></tr>
+                <tr><td><span class="kbd">src/components/BAStreetMap.tsx</span></td><td>Mapa Mapbox GL + rutas y marcadores.</td></tr>
+                <tr><td><span class="kbd">src/components/CarSelectorSheet.tsx</span></td><td>Selector de vehículos.</td></tr>
+                <tr><td><span class="kbd">src/components/SignaturePad.tsx</span></td><td>Firma digital sobre canvas.</td></tr>
+                <tr><td><span class="kbd">src/screens/CorporateExperience.tsx</span></td><td>Navegación corporativa.</td></tr>
+                <tr><td><span class="kbd">src/screens/AdminDashboard.tsx</span></td><td>Panel administrativo.</td></tr>
+                <tr><td><span class="kbd">src/data/mockData.ts</span></td><td>Conductores, vehículos, destinos, pedidos (demo).</td></tr>
+                <tr><td><span class="kbd">src/data/vehicleSeeds.ts</span></td><td>Unidades geolocalizadas de flota.</td></tr>
+                <tr><td><span class="kbd">src/components/PetrominSplash.tsx</span></td><td>Animación de bienvenida.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <strong>Extras visuales (opcionales)</strong>
+            <div class="screen-grid">
+              <figure class="shot"><figcaption>CityCanvas 3D <span class="badge">1170×2532 px</span></figcaption>
+                <div class="device"><div class="notch"></div><div class="screen">
+                  <img class="shot-img" data-index="18" alt="3D CityCanvas"/><div class="fallback" data-fb-index="18"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg><div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div></div>
+                </div></div>
+              </figure>
+
+              <figure class="shot"><figcaption>Splash / Intro <span class="badge">1170×2532 px</span></figcaption>
+                <div class="device"><div class="notch"></div><div class="screen">
+                  <img class="shot-img" data-index="19" alt="Splash / Intro"/><div class="fallback" data-fb-index="19"><svg viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.6"/><path d="M21 21H3V3" stroke="currentColor" stroke-width="1.2" opacity=".5"/></svg><div class="fb-title">Falta imagen</div><div class="fb-hint"><span class="fb-name"></span></div></div>
+                </div></div>
+              </figure>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="container">
+        <p class="small">
+          Hecho con precisión y cariño. Si esta app fuera un coche, sería negro, con interior crema y costuras a mano. <span class="muted">— Tu socio de siempre</span>
+        </p>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // Copiar bloques de código
+    document.querySelectorAll('.copy').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const sel = btn.getAttribute('data-copy'); const el = sel ? document.querySelector(sel) : null;
+        if(!el) return; navigator.clipboard.writeText(el.innerText).then(()=>{
+          const old = btn.textContent; btn.textContent = 'Copiado ✓'; setTimeout(()=>btn.textContent = old, 1200);
+        });
+      });
+    });
+
+    // Scroll suave para anchors del índice
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', (e)=>{
+        const id = a.getAttribute('href'); const target = id && document.querySelector(id);
+        if(target){ e.preventDefault(); target.scrollIntoView({behavior:'smooth', block:'start'}); history.replaceState(null, '', id); }
+      });
+    });
+
+    // Cargar imágenes locales desde /img/img{index}.png y gestionar fallback estético
+    function wireImages(){
+      const imgs = document.querySelectorAll('img.shot-img');
+      imgs.forEach(img=>{
+        const idx = parseInt(img.dataset.index, 10);
+        const file = `img/img${idx}.png`;
+        const fallback = img.closest('.screen')?.querySelector('.fallback');
+        if(fallback){
+          const nameEl = fallback.querySelector('.fb-name'); if(nameEl) nameEl.textContent = file;
+        }
+        img.addEventListener('load', ()=>{
+          img.style.display = 'block';
+          if(fallback) fallback.style.display = 'none';
+        });
+        img.addEventListener('error', ()=>{
+          img.style.display = 'none';
+          if(fallback) fallback.style.display = 'flex';
+        });
+        img.loading = 'lazy';
+        img.src = file;
+      });
+    }
+    wireImages();
+
+    // Exportar HTML (mantiene rutas relativas a /img)
+    document.getElementById('export-html').addEventListener('click', ()=>{
+      const html = '<!doctype html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([html], {type:'text/html'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+      a.download = `SwiftRide_Documentacion_${stamp}.html`;
+      document.body.appendChild(a); a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    });
+  </script>
+</body>
+</html>
