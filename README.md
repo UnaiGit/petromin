@@ -1,90 +1,113 @@
 # Swift Ride
 
-Swift Ride is a React + TypeScript single-page application powered by Vite. It is designed to showcase a fast, polished car rental experience with smooth transitions and an intuitive selector flow.
+Swift Ride is an interactive car-rental demo built with React, TypeScript, and Vite. It lets you explore a premium rental flow, a business ordering portal, and an operations dashboard—all in one place.
 
-## Table of Contents
-- [What You Need](#what-you-need)
-- [Project Setup (Mac)](#project-setup-mac)
-- [Run the App](#run-the-app)
-- [Share on Your Wi-Fi Network](#share-on-your-wi-fi-network)
-- [Available Scripts](#available-scripts)
-- [Project Structure](#project-structure)
-- [Troubleshooting](#troubleshooting)
-- [Learn More](#learn-more)
+## Before You Start
+- A Mac running macOS.
+- Internet access (only needed the first time to install tools).
+- Terminal app (press `Command + Space`, type `Terminal`, press `Return`).
+- A browser such as Safari, Chrome, or Edge.
 
-## What You Need
-- macOS device
-- Terminal app (pre-installed)
-- [Node.js LTS](https://nodejs.org/) (includes npm)
-  - If you prefer Homebrew: `brew install node`
-- A modern browser (Chrome, Safari, Edge)
-
-Check your versions:
+### Check for Node.js and npm
 ```bash
 node -v
 npm -v
 ```
+If both commands print a version number, you can skip to the [Download the Project](#download-the-project) section. If you see "command not found", follow the next steps.
 
-## Project Setup (Mac)
-1. Open **Terminal**.
-2. Navigate to the folder where you want to keep the project. Example:
+### Install Node.js (includes npm)
+Option A – Use the official installer:
+1. Go to https://nodejs.org
+2. Click **LTS** (Recommended for most users) and download the macOS installer.
+3. Open the downloaded `.pkg` file and follow the prompts.
+4. Close and reopen Terminal, then run `node -v` and `npm -v` again to confirm.
+
+Option B – Use Homebrew (if you are comfortable with it):
+```bash
+brew install node
+```
+
+## Download the Project
+Choose one of the following methods.
+
+**Option A – Git clone (recommended):**
+```bash
+cd ~/Desktop
+git clone https://github.com/UnaiGit/petromin.git
+cd petromin
+```
+
+**Option B – Download ZIP:**
+1. Visit https://github.com/UnaiGit/petromin
+2. Click **Code → Download ZIP**.
+3. Unzip the file by double-clicking it. A folder named `petromin-main` (or similar) appears.
+4. Open Terminal and move into that folder. Example:
    ```bash
-   cd ~/Desktop
-   ```
-3. Clone or download the project. If you already have the files, move into the project directory:
-   ```bash
-   cd swift-ride
-   ```
-4. Install the dependencies. This pulls down all required libraries.
-   ```bash
-   npm install
+   cd ~/Downloads/petromin-main
    ```
 
-## Run the App
+## Install Project Packages
+Inside the project folder, run:
+```bash
+npm install
+```
+This command downloads everything the project needs into a local `node_modules` folder.
+
+## Run the App on Your Mac
 Start the development server:
 ```bash
 npm run dev
 ```
-The CLI prints a URL similar to `http://localhost:5173`. Open it in your browser to see the app.
+The terminal shows a message similar to:
+```
+> Local:   http://localhost:5173/
+> Network: http://192.168.x.x:5173/
+```
+Leave this window open; it must keep running. Open the `Local` address in your browser to see Swift Ride.
 
-## Share on Your Wi-Fi Network
-The Vite dev server is configured to listen on all network interfaces, so other devices on your Wi-Fi can use it.
+To stop the server later, click the Terminal window and press `Control + C`.
 
-1. Find your Mac's local IP address:
+## Share the App on Your Wi-Fi Network
+Swift Ride is already configured to allow access from other devices on your Wi-Fi.
+
+1. While `npm run dev` is running, find your Mac's IP address:
    ```bash
    ipconfig getifaddr en0
    ```
-   - If you are on Ethernet or another adapter, run `ifconfig` and use the IP from the active interface.
-2. Keep the dev server running (`npm run dev`).
-3. On another device connected to the same Wi-Fi, open a browser and enter:
+   If this shows nothing, try `ipconfig getifaddr en1` or run `ifconfig` and look for the `inet` value on the active network interface.
+2. On another device (phone, tablet, laptop) connected to the same Wi-Fi, open a browser and type:
    ```
-   http://<your-mac-ip>:5173
+   http://YOUR-IP-ADDRESS:5173
    ```
    Example: `http://192.168.1.23:5173`
-4. Ensure macOS firewall allows incoming connections for `node`. You can adjust this in **System Settings → Network → Firewall**.
+3. If the other device cannot connect, check **System Settings → Network → Firewall** and allow incoming connections for `node` (the process Vite uses).
 
-## Available Scripts
-- `npm run dev` — start the local development server with hot reload.
-- `npm run build` — create an optimized production build inside `dist/`.
-- `npm run preview` — serve the production build locally to verify before deploying.
-- `npm run lint` — run ESLint with the project configuration.
+## Helpful npm Commands
+- `npm run dev` – Start the development server with live reload.
+- `npm run build` – Create an optimized production build inside the `dist` folder.
+- `npm run preview` – Serve the production build locally to double-check it.
+- `npm run lint` – Run ESLint to catch common code issues.
 
-## Project Structure
+## Project Tour
 ```
-swift-ride/
-├─ src/                 # React components, hooks, assets
-├─ public/              # Static assets copied as-is
-├─ vite.config.ts       # Vite + dev-server configuration
-├─ tsconfig*.json       # TypeScript compiler settings
-└─ package.json         # Scripts and dependencies
+petromin/
+├─ src/                  # React components, screens, state, and assets
+├─ public/               # Static files served as-is
+├─ vite.config.ts        # Vite configuration (includes network settings)
+├─ package.json          # Project metadata and scripts
+└─ tsconfig*.json        # TypeScript configuration files
 ```
+
+Highlights:
+- **Consumer experience** – Interactive booking map and vehicle selector.
+- **Corporate portal** – Browse catalogs, sign orders, and manage company details.
+- **Admin dashboard** – Monitor fleet metrics, rentals, and automation ideas.
 
 ## Troubleshooting
-- **`npm` command not found**: Install Node.js from [nodejs.org](https://nodejs.org/). Restart Terminal after installation.
-- **Port already in use**: Another process is using 5173. Stop the other process or run `npm run dev -- --port 5174`.
-- **Other devices cannot connect**: Double-check the IP address, confirm both devices are on the same network, and review macOS firewall settings.
+- **`npm` command not found** – Reinstall Node.js and reopen Terminal.
+- **`npm install` errors** – Check your internet connection; try running the command again.
+- **`npm run dev` says port 5173 is in use** – Stop any other dev servers or run `npm run dev -- --port 5174`.
+- **Browser shows a blank page** – Refresh the page. If the Terminal shows errors, copy them and ask for help.
+- **Other devices cannot load the site** – Confirm the IP address, make sure both devices share the same Wi-Fi, and verify firewall settings.
 
-## Learn More
-- [Vite Documentation](https://vitejs.dev/)
-- [React Documentation](https://react.dev/)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+You are ready to explore Swift Ride. Have fun experimenting with the different experiences and feel free to customize the components in the `src` folder.
