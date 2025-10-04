@@ -1,6 +1,6 @@
-# Patromin
+# Petromin
 
-Patromin is an interactive car-rental demo built with React, TypeScript, and Vite. It lets you explore a premium rental flow, a business ordering portal, and an operations dashboard—all in one place.
+Petromin is an interactive car-rental demo built with React, TypeScript, and Vite. It lets you explore a premium rental flow, a business ordering portal, and an operations dashboard—all in one place.
 
 ## Before You Start
 - A Mac running macOS.
@@ -63,12 +63,12 @@ The terminal shows a message similar to:
 > Local:   http://localhost:5173/
 > Network: http://192.168.x.x:5173/
 ```
-Leave this window open; it must keep running. Open the `Local` address in your browser to see Patromin.
+Leave this window open; it must keep running. Open the `Local` address in your browser to see Petromin.
 
 To stop the server later, click the Terminal window and press `Control + C`.
 
 ## Share the App on Your Wi-Fi Network
-Patromin is already configured to allow access from other devices on your Wi-Fi.
+Petromin is already configured to allow access from other devices on your Wi-Fi.
 
 1. While `npm run dev` is running, find your Mac's IP address:
    ```bash
@@ -110,4 +110,4 @@ Highlights:
 - **Browser shows a blank page** – Refresh the page. If the Terminal shows errors, copy them and ask for help.
 - **Other devices cannot load the site** – Confirm the IP address, make sure both devices share the same Wi-Fi, and verify firewall settings.
 
-You are ready to explore Patromin. Have fun experimenting with the different experiences and feel free to customize the components in the `src` folder.
+You are ready to explore Petromin. Have fun experimenting with the different experiences and feel free to customize the components in the `src` folder.
