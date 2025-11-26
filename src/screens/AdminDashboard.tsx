@@ -45,7 +45,16 @@ const SECTION_COPY: Record<AdminNavSection, { title: string; subtitle: string }>
   },
 };
 
-const OVERVIEW_KPIS = [
+type OverviewKpi = {
+  key: "revenue" | "approvals" | "contracts" | "rate";
+  label: string;
+  value: number;
+  delta: string;
+  format: (value: number) => string;
+  variant?: "glow";
+};
+
+const OVERVIEW_KPIS: ReadonlyArray<OverviewKpi> = [
   {
     key: "revenue",
     label: "Total revenue",
@@ -503,10 +512,10 @@ export function AdminDashboard() {
         {OVERVIEW_KPIS.map((kpi) => (
           <article
             key={kpi.key}
-           className={`admin-card${kpi.variant === "glow" ? " admin-card--glow" : ""}`}
-         >
-           <h3>{kpi.label}</h3>
-           <p className="admin-card__value">
+            className={`admin-card${kpi.variant === "glow" ? " admin-card--glow" : ""}`}
+          >
+            <h3>{kpi.label}</h3>
+            <p className="admin-card__value">
               {"format" in kpi && typeof kpi.format === "function"
                 ? kpi.format(kpi.value)
                 : kpi.value.toLocaleString()}
@@ -767,7 +776,6 @@ export function AdminDashboard() {
           <span className="admin-card__delta">Pipeline this quarter</span>
         </article>
         <article className="admin-card">
-*** End Patch
           <h3>In review</h3>
           <p className="admin-card__value">{RENTAL_PIPELINE.find((item) => item.status === "review")?.count ?? 0}</p>
           <span className="admin-card__delta">{RENTAL_PIPELINE.find((item) => item.status === "review")?.percent ?? 0}% of pipeline</span>
